@@ -48,4 +48,4 @@ Route::get('/error', [PaymentController::class, 'error'])->name('payment.error')
 Route::get('/success', [PaymentController::class, 'success'])->name('payment.success');
 //Protected for admin-site route with Laravel Sanctum
 
-//End Protected for admin-site route with Laravel Sanctum
+//End Protected for admin-site route with Laravel Sanctum Ponlork
