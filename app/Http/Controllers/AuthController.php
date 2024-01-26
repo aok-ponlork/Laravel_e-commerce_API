@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\StoreUserRequest;
+use App\Models\Payment;
 use App\Models\User;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
@@ -98,16 +99,21 @@ class AuthController extends Controller
 
     public function getUserProfile(Request $request)
     {
-       $user = Auth::user();
-       if(!$user){
-            return $this->error('', 'opp something went wrong!', 400);
-       }
+        $user = Auth::user();
+        if (!$user) {
+            return $this->error('', 'Oops, something went wrong!', 400);
+        }
+        $user_id = $user->user_id;
+        //Apply the where condition before calling sum
+        $totalSpend = Payment::where('user_id', $user_id)->sum('amount');
 
-       return response()->json([
-        'user_id' => $user->user_id,
-        'user_name' => $user->name,
-        'created_at' => $user->created_at
-       ], 200);
+        return response()->json([
+            'user_id' => $user->user_id,
+            'user_name' => $user->name,
+            'created_at' => $user->created_at,
+            'user_email' => $user->email,
+            'total_spend' => $totalSpend,
+        ], 200);
     }
 
     public function checkToken()

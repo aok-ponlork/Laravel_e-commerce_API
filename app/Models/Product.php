@@ -18,7 +18,8 @@ class Product extends Model
         'stock_qty',
         'description',
         'image',
-        'category_id'
+        'category_id',
+        'sale_count'
     ];
     public function category(){
         return $this->belongsTo(Category::class, 'category_id');

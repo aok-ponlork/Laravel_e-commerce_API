@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cart;
+use App\Models\Order;
+use App\Models\OrderDetail;
+use App\Models\Payment;
 use App\Models\Product;
 use Exception;
 use Illuminate\Http\Request;
@@ -72,32 +75,37 @@ class PaymentController extends Controller
                 'transactionReference' => $request->input('paymentId'),
             ]);
             $response = $transaction->send();
+            $user_id = $request->user_id;
             if ($response->isSuccessful()) {
-                $user_id = $request->user_id;
                 // The customer has successfully paid.
                 $arr_body = $response->getData();
                 $is_fast_buy = $request->is_fast_buy;
+                //Create new order even if it fast buy or pay all in cart we still need to create order.
+                $order = new Order();
+                $order->user_id = $user_id;
+                $order->total_amount = $arr_body['transactions'][0]['amount']['total'];
+                $order->save();
+
                 //Check if user do fast buy then insert we get only one product_id if not that mean they pay all the product in
                 //cart so we get all product in cart and remove them out and add them into ordered_table
                 if ($is_fast_buy) {
                     $product_id = $request->product_id;
-                    $product = Product::find($product_id);
-                    $product->stock_qty -= 1;
-                    $product->save();
+                    $this->updateProductStockAndInsertOrderDetail($order->id, $product_id, 1);
                 } else {
                     $cartItems = Cart::where('user_id', $user_id)->get();
                     foreach ($cartItems as $cartItem) {
                         // Retrieve the corresponding product
-                        $product = Product::find($cartItem->product_id);
-                        $quantity = $cartItem->quantity;
-                        if ($product) {
-                            $product->stock_qty -= $quantity;
-                            $product->save();
-                        }
+                        $this->updateProductStockAndInsertOrderDetail($order->id, $cartItem->product_id, $cartItem->quantity);
                         $cartItem->delete();
                     }
                 }
-                // ... (rest of the code remains the same)
+                // Insert data into the payments table
+                $payment = new Payment();
+                $payment->user_id = $user_id;
+                $payment->order_id = $order->id;
+                $payment->amount = $arr_body['transactions'][0]['amount']['total'];
+                $payment->payment_status = $arr_body['state'];
+                $payment->save();
                 return response()->json(['success' => true, 'message' => 'Payment successful']);
             } else {
                 return response()->json(['error' => $response->getMessage()], 500);
@@ -115,5 +123,23 @@ class PaymentController extends Controller
     public function error()
     {
         return response()->json(['error' => 'Payment error'], 500);
+    }
+
+    private function updateProductStockAndInsertOrderDetail($order_id, $product_id, $quantity)
+    {
+        $product = Product::find($product_id);
+        if ($product) {
+            // Update product stock
+            $product->stock_qty -= $quantity;
+            $product->sale_count += 1;
+            $product->save();
+            // Insert data into order_details
+            $orderDetail = new OrderDetail();
+            $orderDetail->order_id = $order_id;
+            $orderDetail->product_id = $product_id;
+            $orderDetail->quantity = $quantity;
+            $orderDetail->price = $product->price;
+            $orderDetail->save();
+        }
     }
 }

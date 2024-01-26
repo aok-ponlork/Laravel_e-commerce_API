@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\OrderDetailController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TaskController;
@@ -39,6 +40,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/cart/{action}', [CartController::class, 'decrementOrIncrement'])->name('cart.decrementOrIncrement');
     //Payment 
     Route::post('/charge', [PaymentController::class, 'charge'])->name('payment.charge');
+    //Order Data
+    Route::get('/order-detail', [OrderDetailController::class, 'index'])->name('get_order_detail.data');
 });
 Route::group(['middleware' => ['auth:sanctum', 'ability:user:normal']], function () {
     Route::apiResource('/tasks', TaskController::class);
