@@ -1,3 +1,16 @@
+<h3>Laravel API for Mobile Application</h3>
+
+This is the backend API built with Laravel for my mobile application. The API provides essential endpoints for interacting with the app, including user authentication, data management, and business logic handling.
+Features:
+
+- User Authentication: Sign up, login, and authentication via Laravel Sanctum for secure session management.
+- CRUD Operations: Manage resources like products, categories, and users.
+- RESTful API: Exposes various RESTful endpoints for easy integration with the mobile application.
+- Secure Data Handling: Ensures safe and secure data exchange using Laravel’s built-in features.
+- PayPal Integration: Provides PayPal for processing transactions.
+
+
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
@@ -64,3 +77,4 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
